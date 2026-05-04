@@ -9,12 +9,22 @@ Ampersand :: struct {} // &
 Assign :: struct {} // =
 Comma :: struct {} // ,
 Semi_Colon :: struct {} // ;
+Plus :: struct {} // +
+Minus :: struct {} // -
+Star :: struct {} // *
+Slash :: struct {} // /
+Equal :: struct {} // ==
+Not_Equal :: struct {} // !=
+Less :: struct {} // <
+Greater :: struct {} // >
 
 // brackets
 Open_Paren :: struct {} // (
 Close_Paren :: struct {} // )
 Open_Bracket :: struct {} // {
 Close_Bracket :: struct {} // }
+Open_SB :: struct {} // [
+Close_SB :: struct {} // ]
 
 
 // identifiers
@@ -54,12 +64,22 @@ Token :: union {
 	Assign,
 	Comma,
 	Semi_Colon,
+	Plus,
+	Minus,
+	Star,
+	Slash,
+	Equal,
+	Not_Equal,
+	Less,
+	Greater,
 
 	// brackets
 	Open_Paren,
 	Close_Paren,
 	Open_Bracket,
 	Close_Bracket,
+	Open_SB,
+	Close_SB,
 
 	// identifiers
 	Val,

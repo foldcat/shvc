@@ -80,10 +80,11 @@ next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 		advance(tokenizer)
 		return tokens.Colon{}
 	case '-':
-		if n, ok := peek_next(tokenizer); ok && n == '>' {
+		if n, ok := peek_next(tokenizer); ok && n == '>' { 	// ->
 			advance(tokenizer, 2)
 			return tokens.Arrow{}
 		}
+		return tokens.Minus{}
 	case '^':
 		advance(tokenizer)
 		return tokens.Caret{}
@@ -91,6 +92,10 @@ next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 		advance(tokenizer)
 		return tokens.Ampersand{}
 	case '=':
+		if n, ok := peek_next(tokenizer); ok && n == '=' { 	// ==
+			advance(tokenizer, 2)
+			return tokens.Equal{}
+		}
 		advance(tokenizer)
 		return tokens.Assign{}
 	case ',':
@@ -99,6 +104,21 @@ next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 	case ';':
 		advance(tokenizer)
 		return tokens.Semi_Colon{}
+	case '+':
+		advance(tokenizer)
+		return tokens.Plus{}
+	case '*':
+		advance(tokenizer)
+		return tokens.Star{}
+	case '/':
+		advance(tokenizer)
+		return tokens.Slash{}
+	case '<':
+		advance(tokenizer)
+		return tokens.Less{}
+	case '>':
+		advance(tokenizer)
+		return tokens.Greater{}
 
 	case '(':
 		advance(tokenizer)
@@ -112,6 +132,12 @@ next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 	case '}':
 		advance(tokenizer)
 		return tokens.Close_Bracket{}
+	case '[':
+		advance(tokenizer)
+		return tokens.Open_SB{}
+	case ']':
+		advance(tokenizer)
+		return tokens.Close_SB{}
 
 	// normal string literal
 	case '"':
