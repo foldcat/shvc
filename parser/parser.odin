@@ -631,6 +631,37 @@ parse_program :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.A
 			var_node := parse_var_decl(tokenizer, arena)
 			add_statement_to_block(current_scope, var_node)
 
+		case tokens.Defer:
+			defer_node := new(ast.AST_Node, arena)
+
+			// look ahead to see if we are doing block defer { } or just defer expr
+			if _, is_block := peek_token(tokenizer, arena).(tokens.Open_Bracket); is_block {
+				// this part is blocked defer
+
+				// eat {
+				next_token(tokenizer, arena)
+
+				defer_block := make_block(arena)
+
+				defer_node^ = ast.Defer_Stmt {
+					stmt = make_block_node(defer_block, arena),
+				}
+
+				add_statement_to_block(current_scope, defer_node)
+
+				// to the stack it goes~
+				stack.push(&scope_stack, defer_block)
+			} else {
+				// just defer stmt, no block
+				expr := parse_expression(tokenizer, arena)
+
+				defer_node^ = ast.Defer_Stmt {
+					stmt = expr,
+				}
+
+				add_statement_to_block(current_scope, defer_node)
+			}
+
 		case tokens.If:
 			panic("if statements not implemented")
 

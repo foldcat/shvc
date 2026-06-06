@@ -140,5 +140,9 @@ print_node :: proc(node: ^ast.AST_Node, indent: int) {
 				print_node(arg, indent + 2)
 			}
 		}
+
+	case ast.Defer_Stmt:
+		fmt.println("Defer_Stmt:")
+		print_node(v.stmt, indent + 1)
 	}
 }

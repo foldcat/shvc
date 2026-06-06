@@ -47,6 +47,10 @@ If_Stmt :: struct {
 	body:      ^Block,
 }
 
+Defer_Stmt :: struct {
+	stmt: ^AST_Node,
+}
+
 For_Loop :: struct {
 	// TODO: consider this
 	init: ^AST_Node,
@@ -83,6 +87,7 @@ AST_Node :: union {
 	Fn_Decl,
 	Struct_Decl,
 	If_Stmt,
+	Defer_Stmt,
 	For_Loop,
 	Identifier,
 	Literal,
