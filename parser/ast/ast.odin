@@ -54,6 +54,28 @@ If_Stmt :: struct {
 	else_stmt: ^AST_Node, // can be nil, another If_Stmt, or Block
 }
 
+Array_Literal :: struct {
+	items: ^[dynamic]^AST_Node,
+}
+
+Index_Expr :: struct {
+	target: ^AST_Node,
+	index:  ^AST_Node,
+}
+
+Slice_Expr :: struct {
+	target: ^AST_Node,
+
+	// nil -> omitted
+	// a[:]   => start=nil, end=nil
+	// a[i:]  => start=i, end=nil
+	// a[:j]  => start=nil, end=j
+	// a[i:j] => start=i, end=j
+	start:  ^AST_Node,
+	end:    ^AST_Node,
+}
+
+
 Defer_Stmt :: struct {
 	stmt: ^AST_Node,
 }
@@ -99,6 +121,9 @@ AST_Node :: union {
 	Fn_Decl,
 	Struct_Decl,
 	If_Stmt,
+	Array_Literal,
+	Index_Expr,
+	Slice_Expr,
 	Defer_Stmt,
 	Return_Stmt,
 	For_Loop,
