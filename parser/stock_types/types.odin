@@ -10,6 +10,9 @@ Integer8 :: struct {}
 Integer32 :: struct {}
 Integer64 :: struct {}
 
+Float32 :: struct {}
+Float64 :: struct {}
+
 String :: struct {}
 
 Array_Count_Kind :: enum {
@@ -42,6 +45,8 @@ Types :: union {
 	Integer8,
 	Integer32,
 	Integer64,
+	Float32,
+	Float64,
 	String,
 	Array,
 	Pointer,

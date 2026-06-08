@@ -93,8 +93,14 @@ print_node :: proc(node: ^ast.AST_Node, indent: int) {
 	case ast.Identifier:
 		fmt.printf("Identifier: %s\n", v.name)
 
-	case ast.Literal:
-		fmt.printf("Literal: %s (Type: %v)\n", v.value, v.type)
+	case ast.Int_Literal:
+		fmt.printf("Int_Literal: %d\n", v.value)
+
+	case ast.Float_Literal:
+		fmt.printf("Float_Literal: %f\n", v.value)
+
+	case ast.String_Literal:
+		fmt.printf("String_Literal: %q\n", v.value)
 
 	case ast.Var_Decl:
 		fmt.printf("Var_Decl: %s\n", v.name)

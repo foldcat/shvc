@@ -267,21 +267,68 @@ scan_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 		}
 	}
 
-	// TODO: float
-
 	if unicode.is_digit(char) {
 		start := tokenizer.cursor
+		is_float := false
+
+		// eat init digits
 		for !is_at_end(tokenizer) && unicode.is_digit(peek(tokenizer)) {
 			advance(tokenizer)
 		}
-		int_slice := tokenizer.source[start:tokenizer.cursor]
 
-		integer_str := utf8.runes_to_string(int_slice, context.temp_allocator)
-		val, ok := strconv.parse_int(integer_str)
-		if !ok {
-			panic("fail to parse int") // TODO: proper error handling
+		// check for fractional part
+		if !is_at_end(tokenizer) && peek(tokenizer) == '.' {
+			// ensure next char is a digit
+			// in case we want a range op (we probably wont have it)
+			if nxt, ok := peek_next(tokenizer); ok && unicode.is_digit(nxt) {
+				is_float = true
+				advance(tokenizer) // eat period .
+				for !is_at_end(tokenizer) && unicode.is_digit(peek(tokenizer)) {
+					advance(tokenizer)
+				}
+			}
 		}
-		return tokens.Int_Literal{cast(i32)val} // TODO: think about this
+
+		// scientific stuff
+		if !is_at_end(tokenizer) && (peek(tokenizer) == 'e' || peek(tokenizer) == 'E') {
+			saved_cursor := tokenizer.cursor
+			advance(tokenizer) // consume e or E
+
+			// optional sign
+			if !is_at_end(tokenizer) && (peek(tokenizer) == '+' || peek(tokenizer) == '-') {
+				advance(tokenizer)
+			}
+
+			// should be followed by at least one digit to be a valid exponent
+			if !is_at_end(tokenizer) && unicode.is_digit(peek(tokenizer)) {
+				is_float = true
+				for !is_at_end(tokenizer) && unicode.is_digit(peek(tokenizer)) {
+					advance(tokenizer)
+				}
+			} else {
+				// not a valid exponent suffix
+				// roll back the cursor so the e can be parsed normally later
+				tokenizer.cursor = saved_cursor
+			}
+		}
+
+		// extract, parse, profit
+		num_slice := tokenizer.source[start:tokenizer.cursor]
+		num_str := utf8.runes_to_string(num_slice, context.temp_allocator)
+
+		if is_float {
+			val, ok := strconv.parse_f32(num_str)
+			if !ok {
+				panic("fail to parse float") // TODO: proper error handling
+			}
+			return tokens.Float_Literal{val}
+		} else {
+			val, ok := strconv.parse_int(num_str)
+			if !ok {
+				panic("fail to parse int") // TODO: proper error handling
+			}
+			return tokens.Int_Literal{cast(i32)val}
+		}
 	}
 
 	fmt.println("unexpected character:", char)

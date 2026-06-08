@@ -54,6 +54,10 @@ Int_Literal :: struct {
 	content: i32,
 } // TODO: consider
 
+Float_Literal :: struct {
+	content: f32,
+} // TODO: also consider
+
 // strings
 String_Literal :: struct {
 	content: string,
@@ -111,6 +115,7 @@ Token :: union {
 
 	// numbers
 	Int_Literal,
+	Float_Literal,
 
 	// strings
 	String_Literal,

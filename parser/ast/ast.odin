@@ -102,8 +102,15 @@ Identifier :: struct {
 	name: string,
 }
 
-Literal :: struct {
-	type:  stock_types.Types,
+Int_Literal :: struct {
+	value: i32,
+}
+
+Float_Literal :: struct {
+	value: f32,
+}
+
+String_Literal :: struct {
 	value: string,
 }
 
@@ -134,7 +141,9 @@ AST_Node :: union {
 	Return_Stmt,
 	For_Loop,
 	Identifier,
-	Literal,
+	Int_Literal,
+	Float_Literal,
+	String_Literal,
 	Binary_Op,
 	Unary_Op,
 }

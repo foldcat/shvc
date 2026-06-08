@@ -2,7 +2,6 @@ package parser
 
 import "ast"
 import "base:runtime"
-import "core:fmt"
 import "stack"
 import types "stock_types"
 import "tokens"
@@ -26,28 +25,36 @@ precedence :: proc(token: tokens.Token) -> u8 {
 }
 
 create_leaf_node :: proc(token: tokens.Token, alloc: runtime.Allocator) -> ^ast.AST_Node {
-	// alloc should be the arena
+	// alloc should be in the arena
 	node := new(ast.AST_Node, alloc)
+
 	#partial switch t in token {
 	case tokens.Identifier:
 		node^ = ast.Identifier {
 			name = t.content,
 		}
 		return node
+
 	case tokens.Int_Literal:
-		node^ = ast.Literal { 	// TODO: separate Int and String literal
-			type  = types.Integer64{},
-			value = fmt.aprintf("%d", t.content, allocator = alloc),
-		}
-		return node
-	case tokens.String_Literal:
-		node^ = ast.Literal {
-			type  = types.String{},
+		node^ = ast.Int_Literal {
 			value = t.content,
 		}
 		return node
+
+	case tokens.Float_Literal:
+		node^ = ast.Float_Literal {
+			value = t.content,
+		}
+		return node
+
+	case tokens.String_Literal:
+		node^ = ast.String_Literal {
+			value = t.content,
+		}
+		return node
+
 	case:
-		panic("excepted an identifier or literal")
+		panic("expected an identifier or literal")
 	}
 }
 
@@ -526,7 +533,7 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 			stack.push(&operand_stack, operand)
 			expecting_op = true
 
-		case tokens.Int_Literal, tokens.String_Literal:
+		case tokens.Int_Literal, tokens.Float_Literal, tokens.String_Literal:
 			if expecting_op {
 				unget_token(tokenizer, token)
 				break outer
@@ -860,6 +867,10 @@ parse_type_from_identifier :: proc(name: string) -> types.Types {
 		return types.Integer32{}
 	case "i64":
 		return types.Integer64{}
+	case "f32":
+		return types.Float32{}
+	case "f64":
+		return types.Float64{}
 	case "string":
 		return types.String{}
 	}
