@@ -30,6 +30,7 @@
 - [x] single line if statements with do
 - [x] casting with as
 - [x] reinterpret cast with as!
+- [ ] switch statements
 - [ ] hashmap
 - [ ] distinct type alias
 - [ ] inline asm
@@ -39,6 +40,7 @@
 - [ ] allocators
 - [ ] for loop, array iteration (with or w/o index), infinite loop
 - [ ] reverse iteration based for loop
+- [ ] labelled loops
 - [ ] custom iterators
 - [ ] tagged unions 
 - [ ] c styled unions 
