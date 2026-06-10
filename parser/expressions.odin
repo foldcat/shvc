@@ -5,7 +5,11 @@ import "base:runtime"
 import "stack"
 import "tokens"
 
-parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.AST_Node {
+parse_expression :: proc(
+	tokenizer: ^Tokenizer,
+	arena: runtime.Allocator,
+	allow_struct_literal: bool = true,
+) -> ^ast.AST_Node {
 	operator_stack := stack.make_stack(tokens.Token, context.temp_allocator)
 	operand_stack := stack.make_stack(^ast.AST_Node, context.temp_allocator)
 
@@ -21,6 +25,11 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 
 		case tokens.Open_Bracket:
 			if expecting_op {
+				// check if we are allowed to parse struct literals here
+				if !allow_struct_literal {
+					break outer
+				}
+
 				// typed literal found
 				// eat {
 				token = next_token(tokenizer, arena)
