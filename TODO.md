@@ -38,6 +38,8 @@
 - [ ] multithreading
 - [ ] allocators
 - [ ] for loop, array iteration (with or w/o index), infinite loop
+- [ ] reverse iteration based for loop
+- [ ] custom iterators
 - [ ] tagged unions 
 - [ ] c styled unions 
 - [ ] enum, with customizable backing types
