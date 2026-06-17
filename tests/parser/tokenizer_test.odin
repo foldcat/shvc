@@ -3,6 +3,7 @@ package parser_test
 import "../../parser"
 import "../../parser/tokens"
 import "core:fmt"
+import "core:log"
 import "core:mem/virtual"
 import "core:strings"
 import "core:testing"
@@ -41,7 +42,7 @@ test_entire_token_chain :: proc(t: ^testing.T) {
 		exp := i < len(expected_lines) ? expected_lines[i] : "<END OF STREAM>"
 		act := i < len(actual_lines) ? actual_lines[i] : "<END OF STREAM>"
 		if exp != act {
-			fmt.println("on line:", i + 1, "expected:", exp, "actual:", act)
+			log.errorf("on line:", i + 1, "expected:", exp, "actual:", act)
 			testing.fail(t)
 		}
 	}

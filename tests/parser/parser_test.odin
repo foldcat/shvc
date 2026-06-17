@@ -1,0 +1,67 @@
+package parser_test
+
+import "../../parser"
+import "core:log"
+import "core:mem/virtual"
+import "core:strings"
+import "core:testing"
+
+LARGE_SRC_PATH :: "tests/parser/fixtures/main.shv"
+EXPECTED_AST :: #load("fixtures/main.shv.ast", string)
+
+@(test)
+test_large_program_ast_generation :: proc(t: ^testing.T) {
+	arena: virtual.Arena
+	_ = virtual.arena_init_growing(&arena)
+	alloc := virtual.arena_allocator(&arena)
+	defer virtual.arena_destroy(&arena)
+
+	result := parser.parse_file(LARGE_SRC_PATH)
+	defer virtual.arena_destroy(&result.ast_arena)
+
+	actual_ast_raw := parser.debug_ast_dump(result, alloc)
+
+	actual_clean, _ := strings.replace_all(actual_ast_raw, "\r\n", "\n", alloc)
+	expected_clean, _ := strings.replace_all(EXPECTED_AST, "\r\n", "\n", alloc)
+
+	actual_lines := strings.split_lines(strings.trim_space(actual_clean), alloc)
+	expected_lines := strings.split_lines(strings.trim_space(expected_clean), alloc)
+
+	mismatch := false
+	max_lines := max(len(expected_lines), len(actual_lines))
+
+	for i := 0; i < max_lines; i += 1 {
+		exp := i < len(expected_lines) ? expected_lines[i] : "<END OF TREE>"
+		act := i < len(actual_lines) ? actual_lines[i] : "<END OF TREE>"
+		if exp != act {
+			mismatch = true
+			break
+		}
+	}
+
+	if mismatch {
+		log.error("\n=== AST STRUCTURAL MISMATCH DETECTED ===\n")
+		log.errorf(
+			"%-4s | %-50s | %-50s\n",
+			"Line",
+			"Expected Snapshot",
+			"Actual Tree Node Output",
+		)
+		log.errorf(
+			"-------------------------------------------------------------------------------------------------------\n",
+		)
+
+		for i := 0; i < max_lines; i += 1 {
+			exp := i < len(expected_lines) ? expected_lines[i] : "<END OF TREE>"
+			act := i < len(actual_lines) ? actual_lines[i] : "<END OF TREE>"
+
+			if exp != act {
+				log.errorf("%-4d | %-50q | %-50q <-- MISMATCH!\n", i + 1, exp, act)
+			} else {
+				log.errorf("%-4d | %-50s | %-50s\n", i + 1, exp, act)
+			}
+		}
+		log.errorf("========================================\n")
+		testing.fail(t)
+	}
+}

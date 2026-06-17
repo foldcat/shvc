@@ -1,0 +1,78 @@
+=== AST DUMP ===
+Program:
+  Var_Decl: a
+    Mut: false
+    Kind: Expr
+    Type: Integer32{}
+    Init:
+      Int_Literal: 12
+  Var_Decl: b
+    Mut: true
+    Kind: Expr
+    Type: Integer32{}
+    Init:
+      Int_Literal: 12
+  Binary_Op: Plus_Assign{}
+    Identifier: b
+    Int_Literal: 1
+  Struct_Decl: Foo
+    Fields: [field1: Integer32{}, field2: Integer32{}]
+  Fn_Decl: main
+    Args: [arg1: Integer32{}]
+    Returns: Custom_Type{name = "Foo"}
+    Body:
+      If_Stmt:
+        Condition:
+          Binary_Op: Equal{}
+            Identifier: a
+            Int_Literal: 12
+        Body:
+          Block:
+            Call:
+              Target:
+                Identifier: println
+              Arguments:
+                String_Literal: "hi"
+        Else:
+          If_Stmt:
+            Condition:
+              Binary_Op: Equal{}
+                Identifier: a
+                Int_Literal: 13
+            Body:
+              Block:
+                Call:
+                  Target:
+                    Identifier: println
+                  Arguments:
+                    String_Literal: "hi2"
+            Else:
+              Block:
+                Call:
+                  Target:
+                    Identifier: println
+                  Arguments:
+                    String_Literal: "hi3"
+      Var_Decl: c
+        Mut: false
+        Kind: Expr
+        Type: Custom_Type{name = "Foo"}
+        Init:
+          Struct_Literal:
+            Type:
+              <nil>
+            Fields:
+              Struct_Literal_Field: field1 = 
+                Int_Literal: 12
+              Struct_Literal_Field: field2 = 
+                Int_Literal: 12
+      Return_Stmt:
+        Struct_Literal:
+          Type:
+            Identifier: Foo
+          Fields:
+            Struct_Literal_Field: field1 = 
+              Int_Literal: 13
+            Struct_Literal_Field: field2 = 
+              Int_Literal: 13
+================
