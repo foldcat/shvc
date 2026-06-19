@@ -21,8 +21,10 @@ import "../../parser/tokens"
 import "core:fmt"
 import "core:log"
 import "core:mem/virtual"
+import "core:os"
 import "core:strings"
 import "core:testing"
+import "core:io"
 
 LARGE_SRC :: #load("fixtures/main.shv", string)
 EXPECTED_TOK :: #load("fixtures/main.shv.tokens", string)
@@ -54,12 +56,39 @@ test_entire_token_chain :: proc(t: ^testing.T) {
 
 	max_lines := max(len(expected_lines), len(actual_lines))
 
+	had_err := false
 	for i := 0; i < max_lines; i += 1 {
 		exp := i < len(expected_lines) ? expected_lines[i] : "<END OF STREAM>"
 		act := i < len(actual_lines) ? actual_lines[i] : "<END OF STREAM>"
 		if exp != act {
-			log.errorf("on line: %i - Expected: %s - Actual: %s", i + 1, exp , act)
+			log.errorf("on line: %i - Expected: %s - Actual: %s\n", i + 1, exp, act)
 			testing.fail(t)
+			had_err = true
 		}
+	}
+
+	if had_err {
+		dump_file, err := os.create("./tests/parser/dumped/tokens_dump.txt")
+    
+    if err == nil{
+      buffer_len := 1
+      for line in actual_lines {
+        buffer_len += len(line) + 1
+      }
+      buffer := make([]u8, buffer_len)
+      index := 0
+      for line in actual_lines {
+        for char in line {
+          buffer[index] = cast(u8)(char)
+          index += 1
+        }
+        buffer[index] = '\n' 
+        index += 1
+      }
+      os.write(dump_file, buffer)
+      os.close(dump_file)
+      delete(buffer)
+      log.errorf("\n\n\nDumped Tokens into ./tests/parser/dumped/tokens_dump.text\n\n")
+    }
 	}
 }
