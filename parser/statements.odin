@@ -63,8 +63,10 @@ parse_statement_into_current_scope :: proc(
 
 		add_statement_to_block(current_scope, fn_node)
 
-		if _, obok := peek_token(tokenizer, arena).kind.(tokens.Open_Bracket); obok {
+		bracket_tkn := peek_token(tokenizer, arena)
+		if _, obok := bracket_tkn.kind.(tokens.Open_Bracket); obok {
 			next_token(tokenizer, arena)
+			fn.kind.(ast.Fn_Decl).body.span = bracket_tkn.span
 			stack.push(scope_stack, fn.kind.(ast.Fn_Decl).body)
 		} else {
 			panic("expected function body")
@@ -178,6 +180,7 @@ parse_statement_into_current_scope :: proc(
 
 	case tokens.If:
 		if_node := parse_if_statement(tokenizer, arena)
+		if_node.span = tokens.Span{start = start, end = tokenizer.cursor}
 		add_statement_to_block(current_scope, if_node)
 
 	case tokens.For:
@@ -265,15 +268,17 @@ parse_if_body :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.S
 }
 
 parse_if_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
+	span_start_tkn := make([dynamic]^tokens.Span, arena)
 	conditions := make([dynamic]^ast.Spanned_AST, arena)
 	bodies := make([dynamic]^ast.Spanned_AST, arena)
 
 	final_else: ^ast.Spanned_AST = nil
-
+	start := peek_token(tokenizer, arena)
 	// parse first if
 	first_cond := parse_expression(tokenizer, arena, false)
 	first_body := parse_if_body(tokenizer, arena)
 
+	append(&span_start_tkn, &start.span)
 	append(&conditions, first_cond)
 	append(&bodies, first_body)
 
@@ -284,20 +289,23 @@ parse_if_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 		}
 
 		// consume else
-		next_token(tokenizer, arena)
+		else_tkn := next_token(tokenizer, arena)
 
 		if _, has_if := peek_token(tokenizer, arena).kind.(tokens.If); has_if {
 			// consume if
-			next_token(tokenizer, arena)
+			if_tkn := next_token(tokenizer, arena)
 
 			cond := parse_expression(tokenizer, arena, false)
 			body := parse_if_body(tokenizer, arena)
 
+			append(&span_start_tkn, &if_tkn.span)
 			append(&conditions, cond)
 			append(&bodies, body)
 
 			continue
 		}
+
+		append(&span_start_tkn, &else_tkn.span)
 
 		// plain else
 		next := next_token(tokenizer, arena)
@@ -332,7 +340,7 @@ parse_if_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 			body      = bodies[i],
 			else_stmt = tail,
 		}
-		node.span = tokens.Span{start = conditions[i].span.start, end = end_span}
+		node.span = tokens.Span{start = span_start_tkn[i].start, end = end_span}
 
 		tail = node
 
