@@ -24,14 +24,17 @@ import "tokens"
 
 // name ( args ) -> type
 // args as in name : type , name : type , ...
-parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ast.Fn_Decl {
+parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
 	fn := ast.Fn_Decl{}
 	args_ptr := new([dynamic]ast.Type_Pair, arena)
 	args_ptr^ = make([dynamic]ast.Type_Pair, arena)
 	fn.args = args_ptr
-	fn.body = make_block(arena)
+	root_block := make_block(arena)
 
-	first_tok, idok := next_token(tokenizer, arena).kind.(tokens.Identifier)
+	first_tok_spanned := next_token(tokenizer, arena)
+	start := first_tok_spanned.span.start
+
+	first_tok, idok := first_tok_spanned.kind.(tokens.Identifier)
 	if !idok do panic("expected function or method name")
 
 	if _, has_dot := peek_token(tokenizer, arena).kind.(tokens.Dot); has_dot {
@@ -51,6 +54,8 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> a
 	if _, ntok := next_token(tokenizer, arena).kind.(tokens.Open_Paren); !ntok {
 		panic("expected '('")
 	}
+
+	end_token := peek_token(tokenizer, arena)
 
 	if _, ptok := peek_token(tokenizer, arena).kind.(tokens.Close_Paren); ptok {
 		next_token(tokenizer, arena)
@@ -83,6 +88,7 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> a
 			case tokens.Comma:
 				continue
 			case tokens.Close_Paren:
+				end_token = sep
 				break arg_loop
 			case:
 				panic("expected ',' or ')'")
@@ -94,22 +100,34 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> a
 
 	if _, arok := peek_token(tokenizer, arena).kind.(tokens.Arrow); arok {
 		next_token(tokenizer, arena) // consume ->
+		end_token = peek_token(tokenizer, arena)
 		fn.ret_type = parse_type(tokenizer, arena)
 	}
 
-	return fn
+	bracket_tkn := peek_token(tokenizer, arena)
+	
+	if _, brok := bracket_tkn.kind.(tokens.Open_Bracket); brok {
+		fn.body = make_block_node(root_block, bracket_tkn.span, arena)
+	}
+	
+	node := new(ast.Spanned_AST, arena)
+	node.kind = fn
+	node.span = tokens.Span{start = start, end = end_token.span.end}
+	return node
 }
 
-parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.AST_Node {
-	name_tok, idok := next_token(tokenizer, arena).kind.(tokens.Identifier)
+parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
+	name_spanned := next_token(tokenizer, arena)
+	name_tok, idok := name_spanned.kind.(tokens.Identifier)
 	if !idok do panic("expected trait name")
+	start := name_spanned.span.start
 
 	if _, obok := next_token(tokenizer, arena).kind.(tokens.Open_Bracket); !obok {
 		panic("expected '{' after trait name")
 	}
 
-	methods_ptr := new([dynamic]ast.Fn_Decl, arena)
-	methods_ptr^ = make([dynamic]ast.Fn_Decl, arena)
+	methods_ptr := new([dynamic]ast.Spanned_AST, arena)
+	methods_ptr^ = make([dynamic]ast.Spanned_AST, arena)
 
 	for {
 		if _, cbok := peek_token(tokenizer, arena).kind.(tokens.Close_Bracket); cbok {
@@ -122,7 +140,8 @@ parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 		#partial switch _ in tok.kind {
 		case tokens.Fn:
 			method_sig := parse_fn_signature(tokenizer, arena)
-			append(methods_ptr, method_sig)
+			method_sig.span = tokens.Span{start = tok.span.start, end = tokenizer.cursor}
+			append(methods_ptr, method_sig^)
 
 		case tokens.Semi_Colon:
 			continue
@@ -132,12 +151,12 @@ parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 		}
 	}
 
-	node := new(ast.AST_Node, arena)
-	node^ = ast.Trait_Decl {
+	node := new(ast.Spanned_AST, arena)
+	node.kind = ast.Trait_Decl {
 		name    = name_tok.content,
 		methods = methods_ptr,
 	}
-
+	node.span = tokens.Span{start = start, end = tokenizer.cursor}
 	return node
 }
 
@@ -205,9 +224,10 @@ parse_struct_signature :: proc(
 	return structure
 }
 
-parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.AST_Node {
+parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
 	token := next_token(tokenizer, arena)
 	is_mutable := false
+	start := token.span.start
 
 	// check if its mut
 	if _, ok := token.kind.(tokens.Mut); ok {
@@ -231,10 +251,11 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 
 	// type parsing
 	var_type := parse_type(tokenizer, arena)
+	type_end := tokenizer.cursor  // capture end of type
 
 	// optional init
 	init_kind := ast.Var_Init_Kind.Zero
-	value_expr: ^ast.AST_Node = nil
+	value_expr: ^ast.Spanned_AST = nil
 
 	if _, has_assign := peek_token(tokenizer, arena).kind.(tokens.Assign); has_assign {
 		next_token(tokenizer, arena) // consume =
@@ -247,16 +268,24 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 			init_kind = .Expr
 		}
 	}
-
+	// after the init expression
+	
+	end: int
+	if value_expr != nil {
+    	end = value_expr.span.end          
+	} else {
+		end = type_end
+	}
 	// make node
-	node := new(ast.AST_Node, arena)
-	node^ = ast.Var_Decl {
+	node := new(ast.Spanned_AST, arena)
+	node.kind = ast.Var_Decl {
 		name      = name_tok.content,
 		type_info = var_type,
 		is_mut    = is_mutable,
 		init_kind = init_kind,
 		init_expr = value_expr,
 	}
+	node.span = tokens.Span{start = start, end = end}
 
 	return node
 }
