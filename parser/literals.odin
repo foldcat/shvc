@@ -21,8 +21,6 @@ import "base:runtime"
 import "tokens"
 
 parse_array_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
-	// opening { should have been consumed
-
 	start_token := peek_token(tokenizer, arena)
 	items_ptr := new([dynamic]^ast.Spanned_AST, arena)
 	items_ptr^ = make([dynamic]^ast.Spanned_AST, arena)
@@ -77,11 +75,11 @@ parse_struct_literal :: proc(
 	
 	first_name := first_token.kind.(tokens.Identifier).content
 	first_val := parse_expression(tokenizer, arena)
-
-	struct_literal_field := new(ast.Spanned_AST, arena)
+	
+	struct_literal_field: ast.Spanned_AST
 	struct_literal_field.span = tokens.Span{start = first_token.span.start, end = first_val.span.end}
 	struct_literal_field.kind = ast.Struct_Literal_Field{name = first_name, value = first_val}
-	append(fields_ptr, struct_literal_field^)
+	append(fields_ptr, struct_literal_field)
 
 	// loop
 	for {
@@ -108,10 +106,9 @@ parse_struct_literal :: proc(
 
 			val_expr := parse_expression(tokenizer, arena)
 
-			struct_literal_field = new(ast.Spanned_AST, arena)
 			struct_literal_field.span = tokens.Span{start = ident_tok.span.start, end = val_expr.span.end}
 			struct_literal_field.kind = ast.Struct_Literal_Field{name = ident.content, value = val_expr}
-			append(fields_ptr, struct_literal_field^)
+			append(fields_ptr, struct_literal_field)
 
 			continue
 
@@ -180,10 +177,10 @@ parse_struct_literal_with_type :: proc(
 	first_name := first_token.kind.(tokens.Identifier).content
 	first_val := parse_expression(tokenizer, arena)
 
-	struct_literal_field := new(ast.Spanned_AST, arena)
+	struct_literal_field: ast.Spanned_AST
 	struct_literal_field.span = tokens.Span{start = first_token.span.start, end = first_val.span.end}
 	struct_literal_field.kind = ast.Struct_Literal_Field{name = first_name, value = first_val}
-	append(fields_ptr, struct_literal_field^)
+	append(fields_ptr, struct_literal_field)
 
 	// loop through remaining fields
 	for {
@@ -207,10 +204,9 @@ parse_struct_literal_with_type :: proc(
 
 			val_expr := parse_expression(tokenizer, arena)
 
-			struct_literal_field = new(ast.Spanned_AST, arena)
 			struct_literal_field.span = tokens.Span{start = ident_tok.span.start, end = val_expr.span.end}
 			struct_literal_field.kind = ast.Struct_Literal_Field{name = ident.content, value = val_expr}
-			append(fields_ptr, struct_literal_field^)
+			append(fields_ptr, struct_literal_field)
 			continue
 
 		case tokens.Close_Bracket:

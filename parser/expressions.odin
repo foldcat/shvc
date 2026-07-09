@@ -66,6 +66,7 @@ parse_expression :: proc(
 		}
 
 		token = next_token(tokenizer, arena)
+		start := token.span.start
 
 		#partial switch t in token.kind {
 		case tokens.Identifier:
@@ -82,7 +83,6 @@ parse_expression :: proc(
 			if _, is_call := next.kind.(tokens.Open_Paren); is_call {
 				// eat the (
 				bracket_tkn := next_token(tokenizer, arena)
-				start := bracket_tkn.span.start
 
 				call_node := new(ast.Spanned_AST, arena)
 				args_list := new([dynamic]^ast.Spanned_AST, arena)

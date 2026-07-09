@@ -55,6 +55,8 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 		panic("expected '('")
 	}
 
+	end_token := peek_token(tokenizer, arena)
+
 	if _, ptok := peek_token(tokenizer, arena).kind.(tokens.Close_Paren); ptok {
 		next_token(tokenizer, arena)
 	} else {
@@ -86,6 +88,7 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 			case tokens.Comma:
 				continue
 			case tokens.Close_Paren:
+				end_token = sep
 				break arg_loop
 			case:
 				panic("expected ',' or ')'")
@@ -95,14 +98,18 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 
 	fn.ret_type = types.Unit{}
 
-	end_token := peek_token(tokenizer, arena)
 	if _, arok := peek_token(tokenizer, arena).kind.(tokens.Arrow); arok {
 		next_token(tokenizer, arena) // consume ->
+		end_token = peek_token(tokenizer, arena)
 		fn.ret_type = parse_type(tokenizer, arena)
 	}
 
-	fn.body = make_block_node(root_block, tokens.Span{start = tokenizer.cursor, end = tokenizer.cursor}, arena)
-
+	bracket_tkn := peek_token(tokenizer, arena)
+	
+	if _, brok := bracket_tkn.kind.(tokens.Open_Bracket); brok {
+		fn.body = make_block_node(root_block, bracket_tkn.span, arena)
+	}
+	
 	node := new(ast.Spanned_AST, arena)
 	node.kind = fn
 	node.span = tokens.Span{start = start, end = end_token.span.end}

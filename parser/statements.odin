@@ -18,6 +18,7 @@ package parser
 
 import "ast"
 import "base:runtime"
+import "core:fmt"
 import "stack"
 import "tokens"
 
@@ -59,7 +60,7 @@ parse_statement_into_current_scope :: proc(
 
 		fn_node := new(ast.Spanned_AST, arena)
 		fn_node.kind = fn.kind
-		fn_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		fn_node.span = tokens.Span{start = start, end = fn.span.end}
 
 		add_statement_to_block(current_scope, fn_node)
 
@@ -99,11 +100,13 @@ parse_statement_into_current_scope :: proc(
 				panic("unexpected closing bracket")
 			}
 
-			stack.pop(scope_stack)
+			block, ok := stack.pop(scope_stack)
+			block.span.end = token.span.end
 			return .Done
 		}
 
-		stack.pop(scope_stack)
+		block, ok := stack.pop(scope_stack)
+		block.span.end = token.span.end
 
 	case tokens.Identifier,
 	     tokens.Int_Literal,

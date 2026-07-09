@@ -34,14 +34,12 @@ Program: Span: 0..648
     Fields: [field1: Integer32{}, field2: Integer32{}]
   Trait_Decl: Bar Span: 142..203
     Methods:
-      Fn_Decl: a Span: 156..177
+      Fn_Decl: a Span: 156..182
         Args: [arg: Integer32{}]
         Returns: Integer32{}
-        Body: Span: 177..177
-      Fn_Decl: b Span: 180..201
+      Fn_Decl: b Span: 180..203
         Args: [arg: Integer32{}]
         Returns: Integer32{}
-        Body: Span: 201..201
   Fn_Decl: main Span: 205..230
     Args: [arg1: Integer32{}]
     Returns: Custom_Type{name = "Foo"}
@@ -53,7 +51,7 @@ Program: Span: 0..648
             Int_Literal: 12 Span: 243..245
         Body:
           Block: Span: 252..269
-            Call: Span: 259..265
+            Call: Span: 252..265
               Target:
                 Identifier: println Span: 252..259
               Arguments:
@@ -66,14 +64,14 @@ Program: Span: 0..648
                 Int_Literal: 13 Span: 283..285
             Body:
               Block: Span: 292..310
-                Call: Span: 299..306
+                Call: Span: 292..306
                   Target:
                     Identifier: println Span: 292..299
                   Arguments:
                     String_Literal: "hi2" Span: 300..305
             Else:
               Block: Span: 322..341
-                Call: Span: 330..337
+                Call: Span: 322..337
                   Target:
                     Identifier: println Span: 322..329
                   Arguments:
@@ -95,7 +93,7 @@ Program: Span: 0..648
             Identifier: i Span: 372..373
             Int_Literal: 1 Span: 377..378
         body:
-          Call: Span: 393..416
+          Call: Span: 386..416
             Target:
               Identifier: println Span: 386..393
             Arguments:
@@ -106,7 +104,7 @@ Program: Span: 0..648
         iterable:
           Identifier: my_array Span: 432..440
         body:
-          Call: Span: 455..475
+          Call: Span: 448..475
             Target:
               Identifier: println Span: 448..455
             Arguments:

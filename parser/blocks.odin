@@ -53,12 +53,11 @@ add_statement_to_block :: proc(block: ^ast.Spanned_AST, statement: ^ast.Spanned_
 
 	if (block.span.start > statement.span.start) {
 		block.span.start = statement.span.start
-	} else if (block.span.end < statement.span.end) {
+	} 
+	if (block.span.end < statement.span.end) {
 		block.span.end = statement.span.end
 	}
-
     append(block_node.items, statement)
-	
 }
 
 parse_block_body :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
