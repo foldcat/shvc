@@ -32,7 +32,11 @@ precedence :: proc(item: Op_Item) -> u8 {
 	}
 
 	#partial switch _ in item.token.kind {
-	case tokens.Assign, tokens.Plus_Assign, tokens.Minus_Assign, tokens.Star_Assign, tokens.Slash_Assign:
+	case tokens.Assign,
+	     tokens.Plus_Assign,
+	     tokens.Minus_Assign,
+	     tokens.Star_Assign,
+	     tokens.Slash_Assign:
 		return 1
 	case tokens.Equal, tokens.Not_Equal:
 		return 2
@@ -96,7 +100,10 @@ create_binary_node :: proc(
 		op    = op.kind,
 		right = right,
 	}
-	node.span = tokens.Span{start = left.span.start, end = right.span.end}
+	node.span = tokens.Span {
+		start = left.span.start,
+		end   = right.span.end,
+	}
 	return node
 }
 
@@ -110,7 +117,10 @@ create_unary_node :: proc(
 		op      = op.kind,
 		operand = operand,
 	}
-	node.span = tokens.Span{start = op.span.start, end = operand.span.end}
+	node.span = tokens.Span {
+		start = op.span.start,
+		end   = operand.span.end,
+	}
 	return node
 }
 
@@ -134,8 +144,8 @@ apply_operator :: proc(
 	case tokens.Assign,
 	     tokens.Plus_Assign,
 	     tokens.Minus_Assign,
-		 tokens.Star_Assign,
-		 tokens.Slash_Assign,
+	     tokens.Star_Assign,
+	     tokens.Slash_Assign,
 	     tokens.Plus,
 	     tokens.Minus,
 	     tokens.Star,
@@ -157,7 +167,11 @@ apply_operator :: proc(
 
 is_right_assoc :: proc(token: tokens.Spanned_Token) -> bool {
 	#partial switch _ in token.kind {
-	case tokens.Assign, tokens.Plus_Assign, tokens.Minus_Assign, tokens.Star_Assign, tokens.Slash_Assign:
+	case tokens.Assign,
+	     tokens.Plus_Assign,
+	     tokens.Minus_Assign,
+	     tokens.Star_Assign,
+	     tokens.Slash_Assign:
 		return true
 	}
 	return false

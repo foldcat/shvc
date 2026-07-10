@@ -112,7 +112,10 @@ parse_expression :: proc(
 					target = create_leaf_node(token, arena),
 					args   = args_list,
 				}
-				call_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+				call_node.span = tokens.Span {
+					start = start,
+					end   = tokenizer.cursor,
+				}
 				operand = call_node
 			} else {
 				operand = create_leaf_node(token, arena)
@@ -200,7 +203,10 @@ parse_expression :: proc(
 				target_type    = target_type,
 				is_reinterpret = is_reinterpret,
 			}
-			node.span = tokens.Span{start = left.span.start, end = tokenizer.cursor}
+			node.span = tokens.Span {
+				start = left.span.start,
+				end   = tokenizer.cursor,
+			}
 
 			stack.push(&operand_stack, node)
 			expecting_op = true // cast expression acts as a completed operand phrase
@@ -209,8 +215,8 @@ parse_expression :: proc(
 		case tokens.Assign,
 		     tokens.Plus_Assign,
 		     tokens.Minus_Assign,
-			 tokens.Star_Assign,
-			 tokens.Slash_Assign,
+		     tokens.Star_Assign,
+		     tokens.Slash_Assign,
 		     tokens.Star,
 		     tokens.Slash,
 		     tokens.Equal,

@@ -76,7 +76,10 @@ parse_postfix_expr :: proc(
 
 				result = new(ast.Spanned_AST, arena)
 				result.kind = node^
-				result.span = tokens.Span{start = base.span.start, end = tokenizer.cursor}
+				result.span = tokens.Span {
+					start = base.span.start,
+					end   = tokenizer.cursor,
+				}
 				continue
 			}
 
@@ -89,7 +92,10 @@ parse_postfix_expr :: proc(
 
 			result = new(ast.Spanned_AST, arena)
 			result.kind = node^
-			result.span = tokens.Span{start = base.span.start, end = tokenizer.cursor}
+			result.span = tokens.Span {
+				start = base.span.start,
+				end   = tokenizer.cursor,
+			}
 			continue
 
 		case tokens.Open_SB:
@@ -126,7 +132,10 @@ parse_postfix_expr :: proc(
 
 				result = new(ast.Spanned_AST, arena)
 				result.kind = node^
-				result.span = tokens.Span{start = base.span.start, end = tokenizer.cursor}
+				result.span = tokens.Span {
+					start = base.span.start,
+					end   = tokenizer.cursor,
+				}
 				continue
 			}
 
@@ -156,7 +165,10 @@ parse_postfix_expr :: proc(
 
 				result = new(ast.Spanned_AST, arena)
 				result.kind = node^
-				result.span = tokens.Span{start = base.span.start, end = tokenizer.cursor}
+				result.span = tokens.Span {
+					start = base.span.start,
+					end   = tokenizer.cursor,
+				}
 				continue
 			}
 
@@ -172,7 +184,10 @@ parse_postfix_expr :: proc(
 
 			result = new(ast.Spanned_AST, arena)
 			result.kind = node^
-			result.span = tokens.Span{start = base.span.start, end = tokenizer.cursor}
+			result.span = tokens.Span {
+				start = base.span.start,
+				end   = tokenizer.cursor,
+			}
 			continue
 
 		case:

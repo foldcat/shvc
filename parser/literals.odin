@@ -58,7 +58,10 @@ parse_array_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 	node.kind = ast.Array_Literal {
 		items = items_ptr,
 	}
-	node.span = tokens.Span{start = start_token.span.start, end = tokenizer.cursor}
+	node.span = tokens.Span {
+		start = start_token.span.start,
+		end   = tokenizer.cursor,
+	}
 	return node
 }
 
@@ -72,13 +75,19 @@ parse_struct_literal :: proc(
 
 	// eat colon
 	next_token(tokenizer, arena)
-	
+
 	first_name := first_token.kind.(tokens.Identifier).content
 	first_val := parse_expression(tokenizer, arena)
-	
+
 	struct_literal_field: ast.Spanned_AST
-	struct_literal_field.span = tokens.Span{start = first_token.span.start, end = first_val.span.end}
-	struct_literal_field.kind = ast.Struct_Literal_Field{name = first_name, value = first_val}
+	struct_literal_field.span = tokens.Span {
+		start = first_token.span.start,
+		end   = first_val.span.end,
+	}
+	struct_literal_field.kind = ast.Struct_Literal_Field {
+		name  = first_name,
+		value = first_val,
+	}
 	append(fields_ptr, struct_literal_field)
 
 	// loop
@@ -106,8 +115,14 @@ parse_struct_literal :: proc(
 
 			val_expr := parse_expression(tokenizer, arena)
 
-			struct_literal_field.span = tokens.Span{start = ident_tok.span.start, end = val_expr.span.end}
-			struct_literal_field.kind = ast.Struct_Literal_Field{name = ident.content, value = val_expr}
+			struct_literal_field.span = tokens.Span {
+				start = ident_tok.span.start,
+				end   = val_expr.span.end,
+			}
+			struct_literal_field.kind = ast.Struct_Literal_Field {
+				name  = ident.content,
+				value = val_expr,
+			}
 			append(fields_ptr, struct_literal_field)
 
 			continue
@@ -125,7 +140,10 @@ parse_struct_literal :: proc(
 	node.kind = ast.Struct_Literal {
 		fields = fields_ptr,
 	}
-	node.span = tokens.Span{start = first_token.span.start, end = tokenizer.cursor}
+	node.span = tokens.Span {
+		start = first_token.span.start,
+		end   = tokenizer.cursor,
+	}
 	return node
 }
 
@@ -143,7 +161,10 @@ parse_braced_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) ->
 		node.kind = ast.Array_Literal {
 			items = items_ptr,
 		}
-		node.span = tokens.Span{start = first.span.start, end = tokenizer.cursor}
+		node.span = tokens.Span {
+			start = first.span.start,
+			end   = tokenizer.cursor,
+		}
 		return node
 	}
 
@@ -178,8 +199,14 @@ parse_struct_literal_with_type :: proc(
 	first_val := parse_expression(tokenizer, arena)
 
 	struct_literal_field: ast.Spanned_AST
-	struct_literal_field.span = tokens.Span{start = first_token.span.start, end = first_val.span.end}
-	struct_literal_field.kind = ast.Struct_Literal_Field{name = first_name, value = first_val}
+	struct_literal_field.span = tokens.Span {
+		start = first_token.span.start,
+		end   = first_val.span.end,
+	}
+	struct_literal_field.kind = ast.Struct_Literal_Field {
+		name  = first_name,
+		value = first_val,
+	}
 	append(fields_ptr, struct_literal_field)
 
 	// loop through remaining fields
@@ -204,8 +231,14 @@ parse_struct_literal_with_type :: proc(
 
 			val_expr := parse_expression(tokenizer, arena)
 
-			struct_literal_field.span = tokens.Span{start = ident_tok.span.start, end = val_expr.span.end}
-			struct_literal_field.kind = ast.Struct_Literal_Field{name = ident.content, value = val_expr}
+			struct_literal_field.span = tokens.Span {
+				start = ident_tok.span.start,
+				end   = val_expr.span.end,
+			}
+			struct_literal_field.kind = ast.Struct_Literal_Field {
+				name  = ident.content,
+				value = val_expr,
+			}
 			append(fields_ptr, struct_literal_field)
 			continue
 
@@ -223,7 +256,10 @@ parse_struct_literal_with_type :: proc(
 		type   = type_node,
 		fields = fields_ptr,
 	}
-	node.span = tokens.Span{start = first_token.span.start, end = tokenizer.cursor}
+	node.span = tokens.Span {
+		start = first_token.span.start,
+		end   = tokenizer.cursor,
+	}
 	return node
 }
 
@@ -243,7 +279,10 @@ parse_typed_braced_literal :: proc(
 			type   = type_node,
 			fields = fields_ptr,
 		}
-		node.span = tokens.Span{start = first.span.start, end = tokenizer.cursor}
+		node.span = tokens.Span {
+			start = first.span.start,
+			end   = tokenizer.cursor,
+		}
 		return node
 	}
 

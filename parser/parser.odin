@@ -47,6 +47,9 @@ parse_program :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.S
 		panic("missing closing bracket")
 	}
 
-	root.span = tokens.Span{start = 0, end = tokenizer.cursor}
+	root.span = tokens.Span {
+		start = 0,
+		end   = tokenizer.cursor,
+	}
 	return root
 }
