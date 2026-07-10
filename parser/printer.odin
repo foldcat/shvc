@@ -147,10 +147,22 @@ write_node :: proc(b: ^strings.Builder, node: ^ast.Spanned_AST, indent: int) {
 		fmt.sbprintf(b, "Int_Literal: %d Span: %d..%d\n", v.value, node.span.start, node.span.end)
 
 	case ast.Float_Literal:
-		fmt.sbprintf(b, "Float_Literal: %f Span: %d..%d\n", v.value, node.span.start, node.span.end)
+		fmt.sbprintf(
+			b,
+			"Float_Literal: %f Span: %d..%d\n",
+			v.value,
+			node.span.start,
+			node.span.end,
+		)
 
 	case ast.String_Literal:
-		fmt.sbprintf(b, "String_Literal: %q Span: %d..%d\n", v.value, node.span.start, node.span.end)
+		fmt.sbprintf(
+			b,
+			"String_Literal: %q Span: %d..%d\n",
+			v.value,
+			node.span.start,
+			node.span.end,
+		)
 
 	case ast.Var_Decl:
 		fmt.sbprintf(b, "Var_Decl: %s Span: %d..%d\n", v.name, node.span.start, node.span.end)

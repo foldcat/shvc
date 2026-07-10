@@ -33,7 +33,11 @@ make_block :: proc(arena: runtime.Allocator) -> ^ast.Block {
 	return block
 }
 
-make_block_node :: proc(block: ^ast.Block, span: tokens.Span, arena: runtime.Allocator) -> ^ast.Spanned_AST {
+make_block_node :: proc(
+	block: ^ast.Block,
+	span: tokens.Span,
+	arena: runtime.Allocator,
+) -> ^ast.Spanned_AST {
 	node := new(ast.Spanned_AST, arena)
 	node.kind = block^
 	node.span = span
@@ -53,11 +57,11 @@ add_statement_to_block :: proc(block: ^ast.Spanned_AST, statement: ^ast.Spanned_
 
 	if (block.span.start > statement.span.start) {
 		block.span.start = statement.span.start
-	} 
+	}
 	if (block.span.end < statement.span.end) {
 		block.span.end = statement.span.end
 	}
-    append(block_node.items, statement)
+	append(block_node.items, statement)
 }
 
 parse_block_body :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.Spanned_AST {
@@ -79,5 +83,5 @@ parse_block_body :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 	if scope_stack.len != 0 {
 		panic("internal parser error: block parser ended with non-empty scope stack")
 	}
-	return make_block_node(root_block, tokens.Span{start =  start, end = tokenizer.cursor}, arena)
+	return make_block_node(root_block, tokens.Span{start = start, end = tokenizer.cursor}, arena)
 }

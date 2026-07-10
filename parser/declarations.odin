@@ -105,14 +105,17 @@ parse_fn_signature :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 	}
 
 	bracket_tkn := peek_token(tokenizer, arena)
-	
+
 	if _, brok := bracket_tkn.kind.(tokens.Open_Bracket); brok {
 		fn.body = make_block_node(root_block, bracket_tkn.span, arena)
 	}
-	
+
 	node := new(ast.Spanned_AST, arena)
 	node.kind = fn
-	node.span = tokens.Span{start = start, end = end_token.span.end}
+	node.span = tokens.Span {
+		start = start,
+		end   = end_token.span.end,
+	}
 	return node
 }
 
@@ -140,7 +143,10 @@ parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 		#partial switch _ in tok.kind {
 		case tokens.Fn:
 			method_sig := parse_fn_signature(tokenizer, arena)
-			method_sig.span = tokens.Span{start = tok.span.start, end = tokenizer.cursor}
+			method_sig.span = tokens.Span {
+				start = tok.span.start,
+				end   = tokenizer.cursor,
+			}
 			append(methods_ptr, method_sig^)
 
 		case tokens.Semi_Colon:
@@ -156,7 +162,10 @@ parse_trait_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 		name    = name_tok.content,
 		methods = methods_ptr,
 	}
-	node.span = tokens.Span{start = start, end = tokenizer.cursor}
+	node.span = tokens.Span {
+		start = start,
+		end   = tokenizer.cursor,
+	}
 	return node
 }
 
@@ -251,7 +260,7 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 
 	// type parsing
 	var_type := parse_type(tokenizer, arena)
-	type_end := tokenizer.cursor  // capture end of type
+	type_end := tokenizer.cursor // capture end of type
 
 	// optional init
 	init_kind := ast.Var_Init_Kind.Zero
@@ -269,10 +278,10 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 		}
 	}
 	// after the init expression
-	
+
 	end: int
 	if value_expr != nil {
-    	end = value_expr.span.end          
+		end = value_expr.span.end
 	} else {
 		end = type_end
 	}
@@ -285,7 +294,11 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 		init_kind = init_kind,
 		init_expr = value_expr,
 	}
-	node.span = tokens.Span{start = start, end = end}
+	node.span = tokens.Span {
+		start = start,
+		end   = end,
+	}
 
 	return node
 }
+

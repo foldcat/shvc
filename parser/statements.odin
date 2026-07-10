@@ -60,7 +60,10 @@ parse_statement_into_current_scope :: proc(
 
 		fn_node := new(ast.Spanned_AST, arena)
 		fn_node.kind = fn.kind
-		fn_node.span = tokens.Span{start = start, end = fn.span.end}
+		fn_node.span = tokens.Span {
+			start = start,
+			end   = fn.span.end,
+		}
 
 		add_statement_to_block(current_scope, fn_node)
 
@@ -78,18 +81,28 @@ parse_statement_into_current_scope :: proc(
 
 		struct_node := new(ast.Spanned_AST, arena)
 		struct_node.kind = structure
-		struct_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		struct_node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 
 		add_statement_to_block(current_scope, struct_node)
 
 	case tokens.Trait:
 		trait_decl := parse_trait_decl(tokenizer, arena)
-		trait_decl.span = tokens.Span{start = start, end = tokenizer.cursor}
+		trait_decl.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		add_statement_to_block(current_scope, trait_decl)
 
 	case tokens.Open_Bracket:
 		new_block := make_block(arena)
-		block_node := make_block_node(new_block, tokens.Span{start = start, end = tokenizer.cursor}, arena)
+		block_node := make_block_node(
+			new_block,
+			tokens.Span{start = start, end = tokenizer.cursor},
+			arena,
+		)
 
 		add_statement_to_block(current_scope, block_node)
 		stack.push(scope_stack, block_node)
@@ -133,9 +146,16 @@ parse_statement_into_current_scope :: proc(
 			defer_block := make_block(arena)
 
 			defer_node.kind = ast.Defer_Stmt {
-				stmt = make_block_node(defer_block, tokens.Span{start = start, end = tokenizer.cursor}, arena),
+				stmt = make_block_node(
+					defer_block,
+					tokens.Span{start = start, end = tokenizer.cursor},
+					arena,
+				),
 			}
-			defer_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+			defer_node.span = tokens.Span {
+				start = start,
+				end   = tokenizer.cursor,
+			}
 			add_statement_to_block(current_scope, defer_node)
 
 			stack.push(scope_stack, defer_node)
@@ -145,7 +165,10 @@ parse_statement_into_current_scope :: proc(
 			defer_node.kind = ast.Defer_Stmt {
 				stmt = expr,
 			}
-			defer_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+			defer_node.span = tokens.Span {
+				start = start,
+				end   = tokenizer.cursor,
+			}
 			add_statement_to_block(current_scope, defer_node)
 		}
 
@@ -166,29 +189,44 @@ parse_statement_into_current_scope :: proc(
 		ret_node.kind = ast.Return_Stmt {
 			expr = expr,
 		}
-		ret_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		ret_node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		add_statement_to_block(current_scope, ret_node)
 
 	case tokens.Continue:
 		continue_node := new(ast.Spanned_AST, arena)
 		continue_node.kind = ast.Continue_Stmt{}
-		continue_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		continue_node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		add_statement_to_block(current_scope, continue_node)
 
 	case tokens.Break:
 		break_node := new(ast.Spanned_AST, arena)
 		break_node.kind = ast.Break_Stmt{}
-		break_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		break_node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		add_statement_to_block(current_scope, break_node)
 
 	case tokens.If:
 		if_node := parse_if_statement(tokenizer, arena)
-		if_node.span = tokens.Span{start = start, end = if_node.span.end}
+		if_node.span = tokens.Span {
+			start = start,
+			end   = if_node.span.end,
+		}
 		add_statement_to_block(current_scope, if_node)
 
 	case tokens.For:
 		for_node := parse_for_statement(tokenizer, arena)
-		for_node.span = tokens.Span{start = start, end = for_node.span.end}
+		for_node.span = tokens.Span {
+			start = start,
+			end   = for_node.span.end,
+		}
 		add_statement_to_block(current_scope, for_node)
 
 	case:
@@ -223,13 +261,19 @@ parse_single_statement_after_do :: proc(
 	case tokens.Continue:
 		node := new(ast.Spanned_AST, arena)
 		node.kind = ast.Continue_Stmt{}
-		node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		return node
 
 	case tokens.Break:
 		node := new(ast.Spanned_AST, arena)
 		node.kind = ast.Break_Stmt{}
-		node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		return node
 
 	case tokens.Defer:
@@ -244,7 +288,10 @@ parse_single_statement_after_do :: proc(
 		defer_node.kind = ast.Defer_Stmt {
 			stmt = expr,
 		}
-		defer_node.span = tokens.Span{start = start, end = tokenizer.cursor}
+		defer_node.span = tokens.Span {
+			start = start,
+			end   = tokenizer.cursor,
+		}
 		return defer_node
 
 	case:
@@ -344,7 +391,10 @@ parse_if_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^
 			body      = bodies[i],
 			else_stmt = tail,
 		}
-		node.span = tokens.Span{start = span_start_tkn[i].start, end = end_span}
+		node.span = tokens.Span {
+			start = span_start_tkn[i].start,
+			end   = end_span,
+		}
 
 		tail = node
 
@@ -398,7 +448,10 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 			kind = .Infinite,
 			body = body,
 		}
-		node.span = tokens.Span{start = for_start, end = body.span.end}
+		node.span = tokens.Span {
+			start = for_start,
+			end   = body.span.end,
+		}
 		return node
 	}
 
@@ -435,7 +488,10 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 			post      = post,
 			body      = body,
 		}
-		node.span = tokens.Span{start = for_start, end = body.span.end}
+		node.span = tokens.Span {
+			start = for_start,
+			end   = body.span.end,
+		}
 
 		return node
 	}
@@ -470,7 +526,10 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 			post      = post,
 			body      = body,
 		}
-		node.span = tokens.Span{start = for_start, end = body.span.end}
+		node.span = tokens.Span {
+			start = for_start,
+			end   = body.span.end,
+		}
 		return node
 	}
 
@@ -503,7 +562,10 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 			iter_expr       = iter_expr,
 			body            = body,
 		}
-		node.span = tokens.Span{start = for_start, end = body.span.end}
+		node.span = tokens.Span {
+			start = for_start,
+			end   = body.span.end,
+		}
 		return node
 	}
 
@@ -520,7 +582,10 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 			iter_expr       = iter_expr,
 			body            = body,
 		}
-		node.span = tokens.Span{start = for_start, end = body.span.end}
+		node.span = tokens.Span {
+			start = for_start,
+			end   = body.span.end,
+		}
 		return node
 	}
 
@@ -559,6 +624,9 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 		post      = post,
 		body      = body,
 	}
-	node.span = tokens.Span{start = for_start, end = body.span.end}
+	node.span = tokens.Span {
+		start = for_start,
+		end   = body.span.end,
+	}
 	return node
 }

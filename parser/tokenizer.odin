@@ -312,7 +312,8 @@ scan_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 		num_start := tokenizer.cursor
 		is_float := false
 
-		for !is_at_end(tokenizer) && (unicode.is_digit(peek(tokenizer)) || (!is_float && peek(tokenizer) == '_')) {
+		for !is_at_end(tokenizer) &&
+		    (unicode.is_digit(peek(tokenizer)) || (!is_float && peek(tokenizer) == '_')) {
 			advance(tokenizer)
 		}
 
