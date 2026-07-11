@@ -38,8 +38,15 @@ print_error :: proc(
 
 	if len(source) == 0 do return
 
+	// validation
 	if span.start < 0 || span.start > len(source) {
 		panic("span.start out of range")
+	}
+	if span.end < 0 || span.end > len(source) {
+		panic("span.end out of range")
+	}
+	if span.end < span.start {
+		panic("span.end cannot be less than span.start")
 	}
 
 	// if we point exactly to eof on a blank trailing line
@@ -49,54 +56,45 @@ print_error :: proc(
 		target_pos -= 1
 	}
 
-	// find target line number and column pos
+	// walk to target pos
 	line_no := 1
-	line_start := 0
+	c_start := 0
+	p_start := -1
+
 	for i := 0; i < target_pos; i += 1 {
 		if source[i] == '\n' {
+			p_start = c_start
 			line_no += 1
-			line_start = i + 1
+			c_start = i + 1
 		}
 	}
-	column := target_pos - line_start
+	column := target_pos - c_start
+	p_end := p_start != -1 ? c_start - 1 : -1
 
-	// extract the boundaries for previous, current & next line
-	curr := 0
-	idx := 1
-	p_start, p_end := -1, -1
-	c_start, c_end := -1, -1
+	// walk forward from target pos
+	// scan from target_pos to find the true end of the current line
+	// prevents multi line spans from bleeding int ocurrent line print
+	c_end := target_pos
+	for c_end < len(source) && source[c_end] != '\n' {
+		c_end += 1
+	}
+
 	n_start, n_end := -1, -1
-
-	for curr <= len(source) {
-		line_end := curr
-		for line_end < len(source) && source[line_end] != '\n' {
-			line_end += 1
+	if c_end < len(source) { 	// stopped at a newline so a next line probably exists
+		n_start = c_end + 1
+		n_end = n_start
+		for n_end < len(source) && source[n_end] != '\n' {
+			n_end += 1
 		}
-
-		if idx == line_no - 1 {
-			p_start, p_end = curr, line_end
-		} else if idx == line_no {
-			c_start, c_end = curr, line_end
-		} else if idx == line_no + 1 {
-			n_start, n_end = curr, line_end
-			break // dont need to scan further
-		}
-
-		curr = line_end + 1
-		idx += 1
-		if curr > len(source) do break
 	}
 
 	// find the padding width for line numbers
-	max_ln := line_no
-	if n_start != -1 do max_ln = line_no + 1
+	max_ln := n_start != -1 ? line_no + 1 : line_no
 	digits := 0
 	for t := max_ln; t > 0; t /= 10 {
 		digits += 1
 	}
 	if digits == 0 do digits = 1
-
-	// render
 
 	// previous line
 	if p_start != -1 {
@@ -111,32 +109,26 @@ print_error :: proc(
 	}
 
 	// current line (the one with error)
-	if c_start != -1 {
-		fmt.printf(
-			"%s%*d | %s%s\n",
-			GRAY_START,
-			digits,
-			line_no,
-			ANSI_RESET,
-			source[c_start:c_end],
-		)
-	}
+	fmt.printf("%s%*d | %s%s\n", GRAY_START, digits, line_no, ANSI_RESET, source[c_start:c_end])
 
 	// print ^ here
-	if c_start != -1 {
-		fmt.printf("%*s   ", digits, "")
-
-		current_line_str := source[c_start:c_end]
-		for i in 0 ..< column {
-			// use tabs if it is tab to prevent alignment issues
-			if i < len(current_line_str) && current_line_str[i] == '\t' {
-				fmt.print("\t")
-			} else {
-				fmt.print(" ")
-			}
+	fmt.printf("%*s   ", digits, "")
+	current_line_str := source[c_start:c_end]
+	for i in 0 ..< column {
+		if i < len(current_line_str) && current_line_str[i] == '\t' {
+			fmt.print("\t")
+		} else {
+			fmt.print(" ")
 		}
-		fmt.println(RED_START, "^ here", ANSI_RESET, sep = "")
 	}
+
+	// clamp the ^ length so it wont extend past the current line boundary
+	actual_end := min(span.end, c_end)
+	span_width := max(1, actual_end - span.start)
+	for _ in 0 ..< span_width {
+		fmt.print("^")
+	}
+	fmt.println(RED_START, " here", ANSI_RESET, sep = "")
 
 	// the next line
 	if n_start != -1 {
