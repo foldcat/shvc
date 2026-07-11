@@ -16,9 +16,9 @@
 
 package parser
 
+import "../error"
 import "ast"
 import "base:runtime"
-import "core:fmt"
 import "stack"
 import "tokens"
 
@@ -462,7 +462,13 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 		init := parse_var_decl(tokenizer, arena)
 
 		if _, ok := next_token(tokenizer, arena).kind.(tokens.Semi_Colon); !ok {
-			panic("expected ';' after for-loop initializer")
+			error.print_error(
+				tokenizer.source,
+				init.span,
+				"for loop error",
+				"expected ';' after for-loop initializer",
+				should_panic = true,
+			)
 		}
 
 		condition: ^ast.Spanned_AST = nil

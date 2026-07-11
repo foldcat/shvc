@@ -151,8 +151,8 @@ Token :: union {
 }
 
 Span :: struct {
-	start: int, // inclusive rune index
-	end:   int, // exclusive rune index
+	start: int, // inclusive byte position
+	end:   int, // exclusive byte position
 }
 
 Spanned_Token :: struct {
