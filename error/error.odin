@@ -124,8 +124,7 @@ print_error :: proc(
 
 	// print ^ here
 	if c_start != -1 {
-		for _ in 0 ..< digits {fmt.print(" ")}
-		fmt.print("   ") // matches the | separator
+		fmt.printf("%*s   ", digits, "")
 
 		current_line_str := source[c_start:c_end]
 		for i in 0 ..< column {
