@@ -37,19 +37,14 @@ read_all :: proc(filepath: string, allocator: runtime.Allocator) -> ^Tokenizer {
 }
 
 parse_file :: proc(filepath: string) -> Parse_Result {
-	ast_arena: virtual.Arena
-	_ = virtual.arena_init_growing(&ast_arena)
-	ast_alloc := virtual.arena_allocator(&ast_arena)
+	arena: virtual.Arena
+	_ = virtual.arena_init_growing(&arena)
+	alloc := virtual.arena_allocator(&arena)
 
-	src_arena: virtual.Arena
-	_ = virtual.arena_init_growing(&src_arena)
-	src_alloc := virtual.arena_allocator(&src_arena)
-	defer virtual.arena_destroy(&src_arena)
-
-	tokenizer := read_all(filepath, src_alloc)
-	root := parse_program(tokenizer, ast_alloc)
+	tokenizer := read_all(filepath, alloc)
+	root := parse_program(tokenizer, alloc)
 
 	free_all(context.temp_allocator)
 
-	return Parse_Result{root = root, ast_arena = ast_arena}
+	return Parse_Result{root = root, ast_arena = arena}
 }
